@@ -11,7 +11,7 @@ import android.widget.Toast;
  */
 public class AlarmReceiver extends BroadcastReceiver{
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         // For our recurring task, we'll just display a message
         Bundle mBundle = intent.getExtras();
         String phone = mBundle.getString("phone", "mBundle fail");
