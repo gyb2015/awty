@@ -74,7 +74,7 @@ public class MainActivity extends ActionBarActivity {
         alarmIntent.putExtras(mBundle);
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), (interval * 1000 * 60), pendingIntent);
-        Toast.makeText(this, "Alarm Set for every: "+interval+" minute(s)", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, phone + message, Toast.LENGTH_SHORT).show();
     }
     public void cancel(){
 
@@ -129,3 +129,4 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 }
+
