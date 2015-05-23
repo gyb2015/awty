@@ -2,16 +2,20 @@ package edu.washington.gyb2015.awty;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.telephony.SmsManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.content.IntentFilter;
+
 
 
 public class MainActivity extends ActionBarActivity {
@@ -64,6 +68,28 @@ public class MainActivity extends ActionBarActivity {
             }
         });
     }
+    public class AlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            // For our recurring task, we'll just display a message
+            Bundle mBundle = intent.getExtras();
+            String phone = intent.getStringExtra("phone");
+            String message = intent.getStringExtra("message");
+//        Toast.makeText(context, phone + ": " + message, Toast.LENGTH_SHORT).show();
+            try {
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage(phone, null, message, null, null);
+                Toast.makeText(getApplicationContext(), "SMS Sent!",
+                        Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                Toast.makeText(getApplicationContext(),
+                        "SMS failed, please try again later!",
+                        Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+
+        }
+    }
     public void start(int interval, String phone, String message){
         running = true;
         Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
@@ -73,7 +99,7 @@ public class MainActivity extends ActionBarActivity {
         mBundle.putString("message", message);
         alarmIntent.putExtras(mBundle);
         pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), (interval * 1000 * 60), pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + 5000, (interval * 1000 * 60), pendingIntent);
         Toast.makeText(this, phone + message, Toast.LENGTH_SHORT).show();
     }
     public void cancel(){
@@ -105,6 +131,11 @@ public class MainActivity extends ActionBarActivity {
             return false;
         }
         return true;
+    }
+    private void sendSMS(String phoneNumber, String message)
+    {
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 
     @Override

@@ -2,13 +2,6 @@
 <items version="2" >
 
     <item
-        jar="/Users/iguest/AndroidStudioProjects/awty/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.3/classes.jar"
-        jumboMode="false"
-        revision="21.1.2"
-        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
-        <dex dex="/Users/iguest/AndroidStudioProjects/awty/app/build/intermediates/pre-dexed/debug/classes-81f79e7b7a314c1faed18780df4a2fa5935f9558.jar" />
-    </item>
-    <item
         jar="/Users/iguest/AndroidStudioProjects/awty/app/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/classes.jar"
         jumboMode="false"
         revision="21.1.2"
@@ -21,6 +14,13 @@
         revision="21.1.2"
         sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
         <dex dex="/Users/iguest/AndroidStudioProjects/awty/app/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-be983f0bb5f243c0aeb6b045299dfc2c3a0f1b6f.jar" />
+    </item>
+    <item
+        jar="/Users/iguest/AndroidStudioProjects/awty/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.3/classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="/Users/iguest/AndroidStudioProjects/awty/app/build/intermediates/pre-dexed/debug/classes-81f79e7b7a314c1faed18780df4a2fa5935f9558.jar" />
     </item>
     <item
         jar="/Users/iguest/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/21.0.3/support-annotations-21.0.3.jar"
