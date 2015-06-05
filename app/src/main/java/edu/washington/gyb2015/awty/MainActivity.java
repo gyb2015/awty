@@ -1,163 +1,194 @@
 package edu.washington.gyb2015.awty;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.telephony.SmsManager;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.telephony.SmsMessage;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.content.IntentFilter;
-
-
 
 public class MainActivity extends ActionBarActivity {
 
-    private PendingIntent pendingIntent;
-    private AlarmManager alarmManager;
-    private boolean running;
+    EditText txtMsgEditText, pNumEditText, messagesEditText;
+    Button sendButton;
 
+    static String messages = "";
+
+    // Allows use to update the UI with new messages by telling the Activity
+    // to update the UI every 5 seconds
+    // A handler can schedule for code to execute at a set time in this Activities
+    // thread
+    Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        txtMsgEditText = (EditText) findViewById(R.id.txtMsgEditText);
+        pNumEditText = (EditText) findViewById(R.id.pNumEditText);
+        messagesEditText = (EditText) findViewById(R.id.messagesEditText);
+        sendButton = (Button) findViewById(R.id.sendButton);
 
-        final Button startBtn = (Button) findViewById(R.id.button);
-        final EditText intervalTxt = (EditText) findViewById(R.id.interval);
-        final EditText phoneTxt = (EditText) findViewById(R.id.phone);
-        final EditText messageTxt = (EditText) findViewById(R.id.message);
-        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-
-
-        running = (PendingIntent.getBroadcast(MainActivity.this, 0,
-                new Intent(MainActivity.this, AlarmReceiver.class),
-                PendingIntent.FLAG_NO_CREATE) != null);
-        if(running){
-            startBtn.setText("Stop Alarm");
-        }else{
-            Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-
-        startBtn.setOnClickListener(new View.OnClickListener() {
+        // Thread updates the messages EditText every 10 seconds
+        new Thread(new Runnable() {
             @Override
-            public void onClick(View v) {
-                if (running) {
-                    cancel();
-                    startBtn.setText("Start Alarm");
-                } else if(validate(intervalTxt, phoneTxt, messageTxt)) {
-                    String phone = phoneTxt.getText().toString();
-                    phone = phone.replaceAll("\\D+", "");
-                    phone = phone.substring(0,3) + "-" + phone.substring(3,6) +"-"+ phone.substring(6);
-                    phone = "(" + phone.substring(0,3) + ") " + phone.substring(4);
-                    phoneTxt.setText(phone);
-                    String interval = intervalTxt.getText().toString();
-                    String message = messageTxt.getText().toString();
-                    start(Integer.parseInt(interval),phone,message);
-                    startBtn.setText("Stop ALARM");
+            public void run() {
+                // TODO Auto-generated method stub
+                while (true) {
+                    try {
+
+                        // Wait 5 seconds and then execute the code in run()
+                        Thread.sleep(5000);
+                        mHandler.post(new Runnable() {
+
+                            @Override
+                            public void run() {
+
+                                // Update the messagesEditText
+                                messagesEditText.setText(messages);
+                            }
+                        });
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
-        });
+        }).start();
+
     }
-    public class AlarmReceiver extends BroadcastReceiver {
+
+    public void sendMessage(View view) {
+
+        // Get the phone number and message to send
+        String phoneNum = pNumEditText.getText().toString();
+        String message = txtMsgEditText.getText().toString();
+
+        try{
+
+            // Handles sending and receiving data and text
+            SmsManager smsManager = SmsManager.getDefault();
+
+            // Sends the text message
+            // 2nd is for the service center address or null
+            // 4th if not null broadcasts with a successful send
+            // 5th if not null broadcasts with a successful delivery
+            smsManager.sendTextMessage(phoneNum, null, message, null, null);
+
+            Toast.makeText(this, "Message Sent", Toast.LENGTH_SHORT).show();
+
+        }
+        catch (IllegalArgumentException ex){
+
+            Log.e("TEXTING", "Destination Address or Data Empty");
+            Toast.makeText(this, "Enter a Phone Number and Message", Toast.LENGTH_LONG).show();
+            ex.printStackTrace();
+
+        }
+        catch (Exception ex) {
+            Toast.makeText(this, "Message Not Sent", Toast.LENGTH_LONG).show();
+            ex.printStackTrace();
+        }
+
+        // Update the message EditText
+        messages = messages + "You : " + message + "\n";
+
+    }
+
+    // Receives texts
+    public static class SmsReceiver extends BroadcastReceiver{
+
+        // Handles sending and receiving data and text
+        final SmsManager smsManager = SmsManager.getDefault();
+
+        public SmsReceiver() {
+        }
+
         @Override
-        public void onReceive(final Context context, Intent intent) {
-            // For our recurring task, we'll just display a message
-            Bundle mBundle = intent.getExtras();
-            String phone = intent.getStringExtra("phone");
-            String message = intent.getStringExtra("message");
-//        Toast.makeText(context, phone + ": " + message, Toast.LENGTH_SHORT).show();
-            try {
-                SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(phone, null, message, null, null);
-                Toast.makeText(getApplicationContext(), "SMS Sent!",
-                        Toast.LENGTH_LONG).show();
-            } catch (Exception e) {
-                Toast.makeText(getApplicationContext(),
-                        "SMS failed, please try again later!",
-                        Toast.LENGTH_LONG).show();
-                e.printStackTrace();
+        public void onReceive(Context context, Intent intent) {
+
+            final Bundle bundle = intent.getExtras();
+
+            try{
+
+                // Check if we received data
+                if (bundle != null){
+
+                    // Store data sent as a PDU (Protocal Data Unit) which includes the
+                    // number and text
+                    final Object[] pdusObj = (Object[]) bundle.get("pdus");
+
+                    // Cycle through the data received
+                    for (int i = 0; i < pdusObj.length; i++) {
+
+                        // Create a SmsMessage from the raw PDU data
+                        SmsMessage smsMessage = SmsMessage.createFromPdu((byte[]) pdusObj[i]);
+
+                        // Get sending phone number
+                        String phoneNumber = smsMessage.getDisplayOriginatingAddress();
+
+                        // Get the message sent
+                        String message = smsMessage.getDisplayMessageBody();
+
+                        // Update the messages EditText
+                        // messages = messages + phoneNumber + " : " + message + "\n";
+
+                        // I use this to block the receiving number
+                        messages = messages + "Sender : " + message + "\n";
+
+                    } // end for loop
+                } // bundle is null
+
+            } catch (Exception ex) {
+                Log.e("SmsReceiver", "Exception smsReceiver" +ex);
+
             }
 
         }
-    }
-    public void start(int interval, String phone, String message){
-        running = true;
-        Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-        Bundle mBundle = new Bundle();
-        mBundle.putString("phone", phone);
-        mBundle.putString("interval", String.valueOf(interval));
-        mBundle.putString("message", message);
-        alarmIntent.putExtras(mBundle);
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis() + 5000, (interval * 1000 * 60), pendingIntent);
-        Toast.makeText(this, phone + message, Toast.LENGTH_SHORT).show();
-    }
-    public void cancel(){
 
-        if(pendingIntent == null) {
-            Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        running = false;
-        alarmManager.cancel(pendingIntent);
-        pendingIntent.cancel();
-        Toast.makeText(this, "Alarm Canceled", Toast.LENGTH_SHORT).show();
-        Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
-    private boolean validate(EditText interval, EditText phone, EditText message) {
 
-        if(!phone.getText().toString().isEmpty()) {
-            String phoneNum = phone.getText().toString();
-            phoneNum = phoneNum.replaceAll("\\D+", "");
-            phone.setText(phoneNum);
-            if(phoneNum.length() != 10) {
-                Toast.makeText(this, "Phone number should be 10 digits", Toast.LENGTH_SHORT).show();
-                return false;
-            }
+    // Handles receiving MMS
+    public class MMSReceiver extends BroadcastReceiver {
+        public MMSReceiver() {
         }
-        if(interval.getText().toString().isEmpty() || message.getText().toString().isEmpty()) {
-            Toast.makeText(this, "Please fill in the required fields", Toast.LENGTH_SHORT).show();
-            return false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            throw new UnsupportedOperationException("Not Implemented Yet");
+
         }
-        return true;
+
     }
-    private void sendSMS(String phoneNumber, String message)
-    {
-        SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, message, null, null);
+
+    // Handles when you want to send a pre-written message when a call is rejected
+    public class HeadlessSmsSendService extends BroadcastReceiver {
+        public HeadlessSmsSendService() {
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            throw new UnsupportedOperationException("Not Implemented Yet");
+
+        }
+
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    protected void onDestroy() {
+        mHandler.removeCallbacksAndMessages(null);
+        super.onDestroy();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
 }
 
