@@ -34,9 +34,9 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         txtMsgEditText = (EditText) findViewById(R.id.txtMsgEditText);
-        pNumEditText = (EditText) findViewById(R.id.pNumEditText);
+        pNumEditText = (EditText) findViewById(R.id.phone);
         messagesEditText = (EditText) findViewById(R.id.messagesEditText);
-        sendButton = (Button) findViewById(R.id.sendButton);
+        sendButton = (Button) findViewById(R.id.button);
 
         // Thread updates the messages EditText every 10 seconds
         new Thread(new Runnable() {
@@ -191,4 +191,3 @@ public class MainActivity extends ActionBarActivity {
     }
 
 }
-

@@ -10,21 +10,20 @@
         android:layout_height="wrap_content"
         android:inputType="phone"
         android:ems="8"
-        android:id="@+id/pNumEditText"
-        android:layout_alignParentBottom="true"
+        android:id="@+id/phone"
+        android:hint="Phone Number"
+        android:layout_above="@+id/Interval"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="164dp"
-        android:hint="Phone Number" />
+        android:layout_alignParentStart="true" />
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="start"
-        android:id="@+id/sendButton"
-        android:layout_alignBottom="@+id/pNumEditText"
-        android:layout_toRightOf="@+id/pNumEditText"
-        android:layout_toEndOf="@+id/pNumEditText"
+        android:id="@+id/button"
+        android:layout_alignBottom="@+id/phone"
+        android:layout_toRightOf="@+id/phone"
+        android:layout_toEndOf="@+id/phone"
         android:layout_marginLeft="10dp"
         android:onClick="sendMessage"/>
 
@@ -34,13 +33,12 @@
         android:inputType="textMultiLine"
         android:ems="10"
         android:id="@+id/txtMsgEditText"
-        android:layout_below="@+id/sendButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:lines="5"
         android:hint="Message"
         android:longClickable="false"
-        android:layout_marginTop="10dp">
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/button"
+        android:layout_alignEnd="@+id/button">
         <requestFocus />
     </EditText>
 
@@ -53,5 +51,18 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/sendButton" />
+        android:layout_above="@+id/button" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:id="@+id/Interval"
+        android:hint="Interval"
+        android:layout_above="@+id/txtMsgEditText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/phone"
+        android:layout_alignEnd="@+id/phone" />
+
 </RelativeLayout>
